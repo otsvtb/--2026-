@@ -1,0 +1,25 @@
+name: Sync Football Predictions
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Запуск каждые 15 минут
+  workflow_dispatch:  # Ручной запуск
+
+jobs:
+  sync-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download CSV from Google Drive
+        run: |
+          wget -O predictions.csv "https://drive.google.com/uc?export=download&id=${{ secrets.GOOGLE_FILE_ID }}"
+
+      - name: Commit and push if file changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add predictions.csv
+          git commit -m "Update football predictions [$(date)]" || exit 0
+          git push
