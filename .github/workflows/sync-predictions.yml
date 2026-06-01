@@ -1,25 +1,25 @@
-name: Sync Football Predictions
+function updatePredictions() {
+  // Получаем активную таблицу
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // Укажите здесь точное название вашего листа вместо 'Прогнозы'
+  const sheetName = 'Прогнозы'; 
+  const sheet = ss.getSheetByName(sheetName);
+  
+  // Проверка: существует ли такой лист
+  if (!sheet) {
+    Logger.log('Лист с именем "' + sheetName + '" не найден.');
+    return;
+  }
 
-on:
-  schedule:
-    - cron: '*/15 * * * *'  # Запуск каждые 15 минут
-  workflow_dispatch:  # Ручной запуск
-
-jobs:
-  sync-data:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Download CSV from Google Drive
-        run: |
-          wget -O predictions.csv "https://drive.google.com/uc?export=download&id=${{ secrets.GOOGLE_FILE_ID }}"
-
-      - name: Commit and push if file changed
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add predictions.csv
-          git commit -m "Update football predictions [$(date)]" || exit 0
-          git push
+  // Пример действия: читаем данные из диапазона A2:D10
+  // Вы можете изменить диапазон на нужный вам, например 'A1:Z100'
+  const range = sheet.getRange('A2:D10');
+  const values = range.getValues();
+  
+  // Пример действия: записываем текущую дату и время в ячейку F1
+  sheet.getRange('F1').setValue(new Date());
+  
+  // Пример действия: выводим в журнал количество обработанных строк
+  Logger.log('Обновлено данных на листе ' + sheetName + ': ' + values.length + ' строк.');
+}
